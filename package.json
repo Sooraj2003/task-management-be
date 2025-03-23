@@ -1,0 +1,19 @@
+{
+  "name": "task-management-be",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+     "dev": "nodemon src/app.js",
+     "build": "node src/app.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "express": "^4.21.2",
+    "mongoose": "^8.12.2",
+    "nodemon": "^3.1.9"
+  }
+}
