@@ -1,18 +1,21 @@
 const express = require("express")
 const Task = require("../models/task")
 const {validateTask} = require("../utils/validation")
+const {userAuth} = require("../middlewares/auth")
 
 
 // Creating a router for tasks
 const taskRouter = express.Router();
 
 //Create a task
-taskRouter.post("/task/create", async (req,res)=>{
+taskRouter.post("/task/create",userAuth, async (req,res)=>{
     try{
         // Validate the data recieved from the body
         validateTask(req);
+        const loggedInUser = req.user;
         const {title,description,dueDate,priority,status} = req.body;
         const task = new Task({
+            userId:loggedInUser._id,
             title,
             description,
             dueDate,
@@ -37,9 +40,13 @@ taskRouter.post("/task/create", async (req,res)=>{
 })
 
 //Get the tasks
-taskRouter.get("/tasks",async (req,res)=>{
+taskRouter.get("/tasks",userAuth,async (req,res)=>{
     try{
-     const tasks = await Task.find();
+     const loggedInUser = req.user;
+     const {_id} = loggedInUser;
+     const tasks = await Task.find({
+        userId:_id
+     });
      //Checking if tasks is defined
      if(!tasks){
         throw new Error("Tasks is not found - db find error")
@@ -61,7 +68,7 @@ taskRouter.get("/tasks",async (req,res)=>{
 })
 
 //Update the particular task
-taskRouter.patch("/task/update/:id", async (req, res) => {
+taskRouter.patch("/task/update/:id",userAuth, async (req, res) => {
     try {
         //Validate the body
         validateTask(req);
@@ -69,6 +76,12 @@ taskRouter.patch("/task/update/:id", async (req, res) => {
         const updates = req.body;  // Contains the fields to be updated
 
         const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
+
+        if(updatedTask.userId!== loggedInUser._id){
+            res.status(401).json({
+                errorMessage:"Invalid access"
+            })
+        }
 
         if (!updatedTask) {
             return res.status(404).json({ message: "Task not found" });
@@ -85,7 +98,7 @@ taskRouter.patch("/task/update/:id", async (req, res) => {
 });
 
 //Deleta a task
-taskRouter.delete("/task/delete/:id", async (req, res) => {
+taskRouter.delete("/task/delete/:id",userAuth, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -93,6 +106,11 @@ taskRouter.delete("/task/delete/:id", async (req, res) => {
 
         if (!deletedTask) {
             return res.status(404).json({ message: "Task not found" });
+        }
+        if(deletedTask.userId!== loggedInUser._id){
+            res.status(401).json({
+                errorMessage:"Invalid access"
+            })
         }
 
         res.json({
@@ -106,7 +124,7 @@ taskRouter.delete("/task/delete/:id", async (req, res) => {
 });
 
 //Mark as complete - a particular task
-taskRouter.patch("/task/complete/:id", async (req, res) => {
+taskRouter.patch("/task/complete/:id",userAuth, async (req, res) => {
     try {
         const { id } = req.params;
 
@@ -118,6 +136,11 @@ taskRouter.patch("/task/complete/:id", async (req, res) => {
 
         if (!updatedTask) {
             return res.status(404).json({ message: "Task not found" });
+        }
+        if(updatedTask.userId!== loggedInUser._id){
+            res.status(401).json({
+                errorMessage:"Invalid access"
+            })
         }
 
         res.json({
