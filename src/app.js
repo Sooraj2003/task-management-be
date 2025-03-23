@@ -1,7 +1,13 @@
 const express = require("express")
 const app = express();
-const connectDb = require("./config/database")
+const connectDb = require("./config/database");
+const taskRouter = require("./routes/task");
 
+// Middleware to convert json into javascript object
+app.use(express.json())
+
+//Routes
+app.use("/",taskRouter)
 
 //Connect to DB
 connectDb().then(()=>{
