@@ -3,9 +3,12 @@ const app = express();
 const connectDb = require("./config/database");
 const taskRouter = require("./routes/task");
 const authRouter = require("./routes/auth");
+const cookieParser = require("cookie-parser");
 
 // Middleware to convert json into javascript object
 app.use(express.json())
+//Middleware to parse cookie
+app.use(cookieParser());
 
 //Routes
 app.use("/",taskRouter)

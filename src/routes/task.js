@@ -73,18 +73,33 @@ taskRouter.patch("/task/update/:id",userAuth, async (req, res) => {
         //Validate the body
         validateTask(req);
         const { id } = req.params;
-        const updates = req.body;  // Contains the fields to be updated
+        const {title,description,dueDate,priority} = req.body;  // Contains the fields to be updated
+        
+        
+        const loggedInUser = req.user;
 
-        const updatedTask = await Task.findByIdAndUpdate(id, updates, { new: true });
-
-        if(updatedTask.userId!== loggedInUser._id){
-            res.status(401).json({
-                errorMessage:"Invalid access"
-            })
-        }
+        const updatedTask = await Task.findOneAndUpdate({
+            _id:id,
+            userId:loggedInUser._id
+        }, {
+            title,
+            description,
+            dueDate,
+            priority
+        }, { new: true });
+        
+        console.log(updatedTask);
+        
+       
 
         if (!updatedTask) {
             return res.status(404).json({ message: "Task not found" });
+        }
+
+        if(updatedTask.userId.toString()!== loggedInUser._id.toString()){
+            res.status(401).json({
+                errorMessage:"Invalid access"
+            })
         }
 
         res.json({
@@ -101,13 +116,18 @@ taskRouter.patch("/task/update/:id",userAuth, async (req, res) => {
 taskRouter.delete("/task/delete/:id",userAuth, async (req, res) => {
     try {
         const { id } = req.params;
+        const loggedInUser = req.user;
 
-        const deletedTask = await Task.findByIdAndDelete(id);
+        const deletedTask = await Task.findOneAndDelete({
+            _id:id,
+            userId:loggedInUser._id
+
+        });
 
         if (!deletedTask) {
             return res.status(404).json({ message: "Task not found" });
         }
-        if(deletedTask.userId!== loggedInUser._id){
+        if(deletedTask.userId.toString()!== loggedInUser._id.toString()){
             res.status(401).json({
                 errorMessage:"Invalid access"
             })
@@ -127,6 +147,7 @@ taskRouter.delete("/task/delete/:id",userAuth, async (req, res) => {
 taskRouter.patch("/task/complete/:id",userAuth, async (req, res) => {
     try {
         const { id } = req.params;
+        const loggedInUser = req.user;
 
         const updatedTask = await Task.findByIdAndUpdate(
             id,
@@ -137,7 +158,7 @@ taskRouter.patch("/task/complete/:id",userAuth, async (req, res) => {
         if (!updatedTask) {
             return res.status(404).json({ message: "Task not found" });
         }
-        if(updatedTask.userId!== loggedInUser._id){
+        if(updatedTask.userId.toString()!== loggedInUser._id.toString()){
             res.status(401).json({
                 errorMessage:"Invalid access"
             })
