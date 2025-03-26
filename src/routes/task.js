@@ -1,7 +1,8 @@
 const express = require("express")
 const Task = require("../models/task")
 const {validateTask} = require("../utils/validation")
-const {userAuth} = require("../middlewares/auth")
+const {userAuth} = require("../middlewares/auth");
+const { adminAuth } = require("../middlewares/adminAuth");
 
 
 // Creating a router for tasks
@@ -11,7 +12,7 @@ const taskRouter = express.Router();
 taskRouter.post("/task/create",userAuth, async (req,res)=>{
     try{
         // Validate the data recieved from the body
-        validateTask(req);
+        // validateTask(req);
         const loggedInUser = req.user;
         const {title,description,dueDate,priority,status} = req.body;
         const task = new Task({
@@ -174,6 +175,89 @@ taskRouter.patch("/task/complete/:id",userAuth, async (req, res) => {
     }
 });
 
+// 🚀 New Admin Route: Fetch all users' tasks
+taskRouter.get("/admin/tasks", userAuth, adminAuth, async (req, res) => {
+    try {
+        const tasks = await Task.find({}).populate("userId");
+
+        if (!tasks) throw new Error("Tasks not found - db find error");
+        if (tasks.length === 0) throw new Error("No tasks available");
+
+        res.json({
+            message: "All users' tasks retrieved successfully",
+            tasks
+        });
+    } catch (err) {
+        res.status(400).json({ errorMessage: err.message });
+    }
+});
+//Admin task upadate api
+taskRouter.patch("/admin/task/:taskId", userAuth, adminAuth, async (req, res) => {
+    try {
+        const { taskId } = req.params;
+        const updateFields = req.body; // Only update provided fields
+
+        // Find and update the task
+        const updatedTask = await Task.findByIdAndUpdate(taskId, updateFields, {
+            new: true, // Return updated document
+        });
+
+        if (!updatedTask) {
+            return res.status(404).json({ errorMessage: "Task not found" });
+        }
+
+        res.json({
+            message: "Task updated successfully",
+            task: updatedTask,
+        });
+    } catch (err) {
+        res.status(400).json({ errorMessage: err.message });
+    }
+});
+
+//Admin - delete a task
+taskRouter.delete("/admin/task/:taskId", userAuth, adminAuth, async (req, res) => {
+    try {
+        const { taskId } = req.params;
+
+        // Find and delete the task
+        const deletedTask = await Task.findByIdAndDelete(taskId);
+
+        if (!deletedTask) {
+            return res.status(404).json({ errorMessage: "Task not found" });
+        }
+
+        res.json({
+            message: "Task deleted successfully",
+            task: deletedTask, // Optional: Return deleted task details
+        });
+    } catch (err) {
+        res.status(400).json({ errorMessage: err.message });
+    }
+});
+
+// Mark task as complete (Admin)
+taskRouter.patch('/admin/task/complete/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Find and update task
+        const updatedTask = await Task.findByIdAndUpdate(
+            id,
+            { status: 'completed' },
+            { new: true }
+        );
+
+        if (!updatedTask) {
+            return res.status(404).json({ message: 'Task not found' });
+        }
+
+        res.json({ message: 'Task marked as completed', task: updatedTask });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 
 module.exports = taskRouter
