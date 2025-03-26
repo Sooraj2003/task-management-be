@@ -1,7 +1,8 @@
 # Task Management Backend (task-management-be)
 
 ## Overview
-The **Task Management Backend** is a Node.js and Express-based API server that provides authentication and user profile management features. It supports user sign-up, login, authentication using JWT, and profile retrieval and performs CRUD operations on tasks.
+The **Task Management Backend** is a Node.js and Express-based microservice that provides a REST API for managing user tasks. It supports authentication, role-based access control, and CRUD operations for tasks. The backend is designed to work with a frontend application and interacts with a database to store user and task information.
+
 
 ## Features
 - User authentication (Sign Up, Login, Logout)
@@ -42,21 +43,26 @@ The **Task Management Backend** is a Node.js and Express-based API server that p
 
 
 
-## Project Structure
+## Folder Structure
 ```
-├── models
-│   ├── user.js
-├── routes
-│   ├── auth.js
-|   ├── auth.js
-│   ├── profile.js
+├── config
+│   ├── database.js         # Database connection
 ├── middlewares
-│   ├── auth.js
-|   ├── adimAuth.js
+│   ├── auth.js            # Authentication middleware
+│   ├── adminAuth.js       # Admin role-based middleware
+├── models
+│   ├── user.js            # User model
+│   ├── task.js            # Task model
+├── routes
+│   ├── auth.js            # Authentication routes
+│   ├── profile.js         # User profile routes
+│   ├── task.js            # Task management routes
 ├── utils
-│   ├── validation.js
-├── server.js
-└── package.json
+│   ├── validation.js      # Input validation functions
+├── .gitignore
+├── app.js                 # Entry point
+├── package.json
+├── README.md
 ```
 
 ## Running the Project
@@ -66,4 +72,6 @@ The **Task Management Backend** is a Node.js and Express-based API server that p
 
 ## License
 This project is open-source and available under the MIT License.
+
+
 
