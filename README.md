@@ -1,7 +1,7 @@
 # Task Management Backend (task-management-be)
 
 ## Overview
-The **Task Management Backend** is a Node.js and Express-based API server that provides authentication and user profile management features. It supports user sign-up, login, authentication using JWT, and profile retrieval.
+The **Task Management Backend** is a Node.js and Express-based API server that provides authentication and user profile management features. It supports user sign-up, login, authentication using JWT, and profile retrieval and performs CRUD operations on tasks.
 
 ## Features
 - User authentication (Sign Up, Login, Logout)
@@ -33,6 +33,7 @@ The **Task Management Backend** is a Node.js and Express-based API server that p
    ```env
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_secret_key
+   PORT=your_port_no
    ```
 4. Start the server:
    ```sh
